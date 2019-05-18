@@ -1,0 +1,13 @@
+.ofresearch {
+    width: 20%;
+    float: left;
+}
+
+.cdesigner {
+    width: 80%;
+    float: right;
+}
+
+.xlcontainer {
+    max-width: none;
+}

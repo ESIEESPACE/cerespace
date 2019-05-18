@@ -7,5 +7,6 @@ from . import views
 
 
 urlpatterns = [
-    path('', views.index, name="index")
+    path('', views.index, name="index"),
+    path('designer', views.designer, name="index")
 ] + static(settings.STATIC_URL)
