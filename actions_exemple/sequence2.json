@@ -1,6 +1,7 @@
 {
   "type" : "sequence",
   "id" : "seq2",
+  "name" : "Sequence 2",
   "commands" : [
     ["go", [20, 50, 80]],
     ["wait", 2000],

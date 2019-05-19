@@ -9,7 +9,7 @@ def readinstant(data):
     gcode = ""
     for command in data["commands"]:
         runcommand(command)
-    return gcode
+    return
 
 
 def readevent(data):
@@ -17,22 +17,33 @@ def readevent(data):
 
 
 def readsequence(data):
+    printdebug("Sequence id: " + data["id"])
+    printdebug("Sequence name: " + data["name"])
+
+    for command in data["commands"]:
+        runcommand(command)
     return
 
 
 def runcommand(command):
     if command[0] == "wait" and len(command) == 2:
         printdebug("wait for {}ms".format(command[1]))
-        time.sleep(command[1]/1000)
+        time.sleep(command[1] / 1000)
+
     elif command[0] == "send":
         retmessage = ""
         for message in range(1, len(command) - 1):
-           retmessage += command[message] + "\n"
+            retmessage += command[message] + "\n"
         printdebug("send message : " + retmessage)
+
+    elif command[0] == "run":
+        printdebug("asked to run: " + command[1])
+
     else:
-        printdebug("returned G-CODE : {}".format(commandtogcode(command)))
-
-
+        try:
+            printdebug("returned G-CODE : {}".format(commandtogcode(command)))
+        except ValueError:
+            traceback.print_exc()
 
 
 def commandtogcode(command):
@@ -76,7 +87,6 @@ def commandtogcode(command):
 
 
 def routejson(data):
-
     router = {
         "event": readevent,
         "sequence": readsequence,
