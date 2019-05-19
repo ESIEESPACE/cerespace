@@ -8,3 +8,7 @@ def index(request):
 
 def designer(request):
     return render(request, 'designer.html')
+
+
+def control(request):
+    return render(request, 'control.html')

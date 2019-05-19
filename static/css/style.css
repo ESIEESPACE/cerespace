@@ -11,3 +11,15 @@
 .xlcontainer {
     max-width: none;
 }
+
+.btn-control {
+    width: 100%;
+}
+
+.ctrlpan {
+    text-align: center;
+}
+
+#distselect {
+    width: 100%;
+}

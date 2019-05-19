@@ -1,0 +1,28 @@
+{% extends 'skeleton.html' %}
+{% block body %}
+    <h1>Cerespace controler</h1>
+
+    <div class="container">
+        <div class="row">
+            <div class="col ctrlpan"></div>
+            <div class="col ctrlpan"><button id="fw" class="btn btn-success btn-control">Forward</button></div>
+            <div class="col ctrlpan"></div>
+            <div class="col ctrlpan"><button id="up" class="btn btn-success btn-control">Up</button></div>
+        </div>
+        <div class="row">
+            <div class="col ctrlpan"><button id="rg" class="btn btn-success btn-control">Right</button></div>
+            <div class="col ctrlpan"><button id="bw" class="btn btn-success btn-control">Backward</button></div>
+            <div class="col ctrlpan"><button id="lf" class="btn btn-success btn-control">Left</button></div>
+            <div class="col ctrlpan"><button id="dw" class="btn btn-success btn-control">Down</button></div>
+        </div>
+        <div class="row">
+            <input id="distselect" type="range" max="10000" min="0" value="10" class="distcontroller">
+            <input type="number" max="10000" min="0" class="distcontroller">
+            <label> mm</label>
+        </div>
+    </div>
+{% endblock %}
+
+
+
+
