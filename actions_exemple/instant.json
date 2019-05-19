@@ -1,0 +1,6 @@
+{
+    "type":"instant",
+    "commands": [
+        ["emergency"]
+    ]
+}

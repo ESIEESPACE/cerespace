@@ -1,0 +1,10 @@
+{
+    "type":"instant",
+    "commands": [
+      ["go", [20, 100, 90]],
+      ["read", 10, 0],
+      ["write", 20, 1],
+      ["wait", 2000],
+      ["getpos"]
+    ]
+}

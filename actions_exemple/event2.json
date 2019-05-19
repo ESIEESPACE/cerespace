@@ -1,0 +1,8 @@
+{
+  "type" : "event",
+  "id" : "event2",
+  "when": ["everyweek", ["mon",20,30]],
+  "sequences": [
+    "sequence1.json"
+  ]
+}

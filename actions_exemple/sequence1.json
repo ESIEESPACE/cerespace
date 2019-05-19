@@ -1,0 +1,11 @@
+{
+  "type" : "sequence",
+  "id" : "seq1",
+  "name" : "Sequence 1",
+  "commands" : [
+    ["go", [20, 50, 80]],
+    ["wait", 2000],
+    ["send", "hello"],
+    ["run", "home"]
+  ]
+}
