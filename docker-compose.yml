@@ -17,6 +17,8 @@ services:
       - ./:/code
     ports:
       - "8000:8000"
+    depends_on:
+      - mqtt
 
   client:
     build: ./client
@@ -25,4 +27,5 @@ services:
       - .env
     volumes:
       - ./client:/code
-
+    depends_on:
+      - mqtt
