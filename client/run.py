@@ -9,17 +9,17 @@ import paho.mqtt.client as mqtt
 client = mqtt.Client()
 
 
-def on_connect(client, userdata, flags, rc):
+def on_connect(client : mqtt.Client, userdata, flags, rc: int):
     print("Connected with result code " + str(rc))
     client.subscribe("farm/farm1")
     client.subscribe("farm/farm1/instants")
 
 
-def on_disconnect(client, userdata, rc):
+def on_disconnect(client, userdata, rc: int):
     print("Disconnected with result code " + str(rc))
 
 
-def on_message(client, userdata, msg):
+def on_message(client: mqtt.Client, userdata, msg: mqtt.MQTTMessage):
     if msg.topic == "farm/farm1/instants":
         try:
             commands = json.loads(msg.payload.decode("utf-8"))
@@ -39,7 +39,7 @@ def connect():
     client.connect("mqtt", 1883, 60)
 
 
-def ping(slp=60):
+def ping(slp: int = 60):
     while True:
         try:
             client.publish("farm/farm1", '["ping"]')
@@ -49,7 +49,7 @@ def ping(slp=60):
         time.sleep(slp)
 
 
-def command_to_gcode(command):
+def command_to_gcode(command) -> str:
     if command[0] == "emergency":
         return "E"
 
