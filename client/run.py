@@ -11,14 +11,17 @@ client = mqtt.Client()
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code " + str(rc))
     client.subscribe("farm/farm1")
+    client.subscribe("farm/farm1/instants")
 
 
 def on_disconnect(client, userdata, rc):
     print("Disconnected with result code " + str(rc))
 
-# The callback for when a PUBLISH message is received from the server.
+
 def on_message(client, userdata, msg):
-    print(msg.topic + " " + str(msg.payload))
+    if msg.topic is "instant":
+        print("Instant : " + str(msg.payload))
+    # print(msg.topic + " " + str(msg.payload))
 
 
 def connect():
