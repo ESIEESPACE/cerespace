@@ -36,7 +36,10 @@ def connect():
     client.on_message = on_message
     client.on_disconnect = on_disconnect
 
-    client.connect("mqtt", 1883, 60)
+    if len(sys.argv) > 1:
+        client.connect(sys.argv[1], 1883, 60)
+    else:
+        client.connect("mqtt", 1883, 60)
 
 
 def ping(slp: int = 60):
@@ -95,6 +98,7 @@ def main_loop():
 
 
 if __name__ == '__main__':
+    print("Starting CERESPACE Client")
     connect()
     client.loop_start()
 
