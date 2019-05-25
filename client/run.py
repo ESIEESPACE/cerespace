@@ -19,9 +19,8 @@ def on_disconnect(client, userdata, rc):
 
 
 def on_message(client, userdata, msg):
-    if msg.topic is "instant":
+    if msg.topic == "farm/farm1/instants":
         print("Instant : " + str(msg.payload))
-    # print(msg.topic + " " + str(msg.payload))
 
 
 def connect():
