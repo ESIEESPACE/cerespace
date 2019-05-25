@@ -1,3 +1,4 @@
+import json
 import sys
 import threading
 import time
@@ -20,7 +21,14 @@ def on_disconnect(client, userdata, rc):
 
 def on_message(client, userdata, msg):
     if msg.topic == "farm/farm1/instants":
-        print("Instant : " + str(msg.payload))
+        try:
+            commands = json.loads(msg.payload.decode("utf-8"))
+            for command in commands:
+                print(command_to_gcode(command))
+
+        except Exception:
+            print(msg.payload.decode("utf-8"))
+            traceback.print_exc()
 
 
 def connect():
@@ -39,6 +47,46 @@ def ping(slp=60):
             pass
 
         time.sleep(slp)
+
+
+def command_to_gcode(command):
+    if command[0] == "emergency":
+        return "E"
+
+    elif command[0] == "fakeapproved":
+        return command_to_gcode(["writeparam", 2, 1])
+
+    elif command[0] == "go" and len(command) == 2:
+        return "G00 X{} Y{} Z{}".format(command[1][0], command[1][1], command[1][2])
+
+    elif command[0] == "home" and len(command) == 2:
+        if command[1] == "X":
+            return "F11"
+        elif command[1] == "Y":
+            return "F12"
+        elif command[1] == "Z":
+            return "F13"
+
+    elif command[0] == "read" and len(command) == 3:
+        return "F42 P{} M{}".format(command[1], command[2])
+
+    elif command[0] == "write" and len(command) == 3:
+        return "F32 P{} V{}".format(command[1], command[2])
+
+    elif command[0] == "write" and len(command) == 6:
+        return "F32 P{} V{} W{} T{} M{}".format(command[1], command[2], command[3], command[4], command[5])
+
+    elif command[0] == "writeparam" and len(command) == 3:
+        return "F22 P{} V{}".format(command[1], command[2])
+
+    elif command[0] == "getparam" and len(command) == 2:
+        return "F21 P{}".format(command[1])
+
+    elif command[0] == "getpos" and len(command) == 1:
+        return "F82"
+
+    else:
+        raise ValueError("Invalid command : " + command)
 
 
 def main_loop():
