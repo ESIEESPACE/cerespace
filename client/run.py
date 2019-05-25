@@ -1,28 +1,63 @@
+import sys
+import threading
+import time
+import traceback
+
 import paho.mqtt.client as mqtt
 
+client = mqtt.Client()
 
-# The callback for when the client receives a CONNACK response from the server.
+
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code " + str(rc))
+    client.subscribe("farm/farm1")
 
-    # Subscribing in on_connect() means that if we lose the connection and
-    # reconnect then subscriptions will be renewed.
-    client.subscribe("$SYS/#")
 
+def on_disconnect(client, userdata, rc):
+    print("Disconnected with result code " + str(rc))
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
     print(msg.topic + " " + str(msg.payload))
 
 
-client = mqtt.Client()
-client.on_connect = on_connect
-client.on_message = on_message
+def connect():
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.on_disconnect = on_disconnect
 
-client.connect("mqtt", 1883, 60)
+    client.connect("mqtt", 1883, 60)
 
-client.loop_start()
 
-while True:
-    client.publish("paho/temperature", "hello")
+def ping(slp=60):
+    while True:
+        try:
+            client.publish("farm/farm1", '["ping"]')
+        except:
+            pass
 
+        time.sleep(slp)
+
+
+def main_loop():
+    while True:
+        pass
+
+
+if __name__ == '__main__':
+    connect()
+    client.loop_start()
+
+    ping_process = threading.Thread(target=ping)
+    ping_process.setDaemon(True)
+    ping_process.start()
+
+    try:
+        main_loop()
+    except KeyboardInterrupt:
+        print("Shutdown requested...exiting")
+    except Exception:
+        traceback.print_exc(file=sys.stdout)
+
+    client.loop_stop()
+    sys.exit(0)
