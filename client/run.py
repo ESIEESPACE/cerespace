@@ -9,7 +9,7 @@ import paho.mqtt.client as mqtt
 client = mqtt.Client()
 
 
-def on_connect(client : mqtt.Client, userdata, flags, rc: int):
+def on_connect(client: mqtt.Client, userdata, flags, rc: int):
     print("Connected with result code " + str(rc))
     client.subscribe("farm/farm1")
     client.subscribe("farm/farm1/instants")
@@ -43,6 +43,7 @@ def connect():
 
 
 def ping(slp: int = 60):
+    print("Starting ping service")
     while True:
         try:
             client.publish("farm/farm1", '["ping"]')
@@ -94,7 +95,7 @@ def command_to_gcode(command) -> str:
 
 def main_loop():
     while True:
-        pass
+        time.sleep(1)
 
 
 if __name__ == '__main__':
