@@ -24,8 +24,7 @@ def on_message(client: mqtt.Client, userdata, msg: mqtt.MQTTMessage):
         try:
             commands = json.loads(msg.payload.decode("utf-8"))
             for command in commands:
-                print(command_to_gcode(command))
-
+                print(run_command(command))
         except Exception:
             print(msg.payload.decode("utf-8"))
             traceback.print_exc()
@@ -43,7 +42,7 @@ def connect():
 
 
 def ping(slp: int = 60):
-    print("Starting ping service")
+    print("Starting ping service\n")
     while True:
         try:
             client.publish("farm/farm1", '["ping"]')
@@ -91,6 +90,27 @@ def command_to_gcode(command) -> str:
 
     else:
         raise ValueError("Invalid command : " + command)
+
+
+def run_command(command):
+    if command[0] == "wait" and len(command) == 2:
+        print("wait for {}ms".format(command[1]))
+        time.sleep(command[1] / 1000)
+
+    elif command[0] == "send":
+        returned_message = ""
+        for message in range(1, len(command) - 1):
+            returned_message += command[message] + "\n"
+        client.publish("farm/farm1/logs", returned_message)
+
+    elif command[0] == "run":
+        print("asked to run: " + command[1])
+
+    else:
+        try:
+            print("returned G-CODE : {}".format(command_to_gcode(command)))
+        except ValueError:
+            traceback.print_exc()
 
 
 def main_loop():
