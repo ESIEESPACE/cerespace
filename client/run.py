@@ -1,8 +1,10 @@
+import datetime
 import json
 import sys
 import threading
 import time
 import traceback
+import cv2
 
 import paho.mqtt.client as mqtt
 
@@ -24,7 +26,7 @@ def on_message(client: mqtt.Client, userdata, msg: mqtt.MQTTMessage):
         try:
             commands = json.loads(msg.payload.decode("utf-8"))
             for command in commands:
-                print(run_command(command))
+                run_command(command)
         except Exception:
             print(msg.payload.decode("utf-8"))
             traceback.print_exc()
@@ -106,11 +108,23 @@ def run_command(command):
     elif command[0] == "run":
         print("asked to run: " + command[1])
 
+    elif command[0] == "photo":
+        take_photo()
+
     else:
         try:
             print("returned G-CODE : {}".format(command_to_gcode(command)))
         except ValueError:
             traceback.print_exc()
+
+
+def take_photo():
+    print("Taking photo")
+    cam = cv2.VideoCapture(0)
+    ret, frame = cam.read()
+    img_name = "photos/opencv_frame_{}.png".format(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M"))
+    cv2.imwrite(img_name, frame)
+    cam.release()
 
 
 def main_loop():
