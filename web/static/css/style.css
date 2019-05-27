@@ -1,0 +1,25 @@
+.ofresearch {
+    width: 20%;
+    float: left;
+}
+
+.cdesigner {
+    width: 80%;
+    float: right;
+}
+
+.xlcontainer {
+    max-width: none;
+}
+
+.btn-control {
+    width: 100%;
+}
+
+.ctrlpan {
+    text-align: center;
+}
+
+#distselect {
+    width: 100%;
+}
