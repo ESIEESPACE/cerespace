@@ -25,10 +25,11 @@ services:
 
   client:
     build: ./client
-    command: python run.py
+    command: python client.py
     env_file:
       - .env
     volumes:
       - ./client:/code
+      - /dev:/dev
     depends_on:
       - mqtt
