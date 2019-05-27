@@ -1,8 +1,8 @@
 import time
 import traceback
 
-from client.client import send_logs
-from client.photos import *
+from client import photos
+from client import client
 
 
 def command_to_gcode(command) -> str:
@@ -54,13 +54,13 @@ def run_command(command):
         returned_message = ""
         for message in range(1, len(command) - 1):
             returned_message += command[message] + "\n"
-        send_logs(returned_message)
+        client.send_logs(returned_message)
 
     elif command[0] == "run":
         print("asked to run: " + command[1])
 
     elif command[0] == "photo":
-        take_photo()
+        photos.take_photo()
 
     else:
         try:

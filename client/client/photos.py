@@ -1,3 +1,4 @@
+import datetime
 import cv2
 
 
@@ -8,3 +9,4 @@ def take_photo():
     img_name = "photos/opencv_frame_{}.png".format(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M"))
     cv2.imwrite(img_name, frame)
     cam.release()
+

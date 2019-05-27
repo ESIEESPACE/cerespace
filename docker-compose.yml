@@ -12,12 +12,12 @@ services:
       - "9001:9001"
 
   web:
-    build: ./
+    build: ./web
     command: python manage.py runserver 0.0.0.0:8000
     env_file:
       - .env
     volumes:
-      - ./:/code
+      - ./web:/code
     ports:
       - "8000:8000"
     depends_on:
@@ -25,7 +25,7 @@ services:
 
   client:
     build: ./client
-    command: python client.py
+    command: python main.py
     env_file:
       - .env
     volumes:

@@ -1,12 +1,12 @@
-import datetime
 import json
 import sys
 import threading
 import time
 import traceback
-import cv2
 
 import paho.mqtt.client as mqtt
+
+from client import run
 
 client = mqtt.Client()
 
@@ -26,7 +26,7 @@ def on_message(client: mqtt.Client, userdata, msg: mqtt.MQTTMessage):
         try:
             commands = json.loads(msg.payload.decode("utf-8"))
             for command in commands:
-                run_command(command)
+                run.run_command(command)
         except Exception:
             print(msg.payload.decode("utf-8"))
             traceback.print_exc()
@@ -63,7 +63,7 @@ def main_loop():
         time.sleep(1)
 
 
-if __name__ == '__main__':
+def main():
     print("Starting CERESPACE Client")
     connect()
     client.loop_start()
@@ -81,3 +81,7 @@ if __name__ == '__main__':
 
     client.loop_stop()
     sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()
