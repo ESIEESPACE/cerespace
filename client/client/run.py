@@ -42,10 +42,11 @@ def command_to_gcode(command) -> str:
         return "F82"
 
     else:
-        raise ValueError("Invalid command : " + command)
+        raise ValueError("Invalid command : " + str(command))
 
 
 def run_command(command):
+    print(str(command))
     if command[0] == "wait" and len(command) == 2:
         print("wait for {}ms".format(command[1]))
         time.sleep(command[1] / 1000)
@@ -59,7 +60,7 @@ def run_command(command):
     elif command[0] == "run":
         print("asked to run: " + command[1])
 
-    elif command[0] == "photo":
+    elif command[0] == "take_photo":
         photos.take_photo()
 
     else:

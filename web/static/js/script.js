@@ -1,6 +1,9 @@
 var client = mqtt.connect("ws://0.0.0.0:9001");
 
-client.subscribe("farm/farm1");
+const MAIN_CHANEL = "farm/farm1";
+const INSTANT_CHANEL = "/instants";
+
+client.subscribe(MAIN_CHANEL);
 
 client.on("message", function (topic, payload) {
     console.log([topic, payload].join(": "));
@@ -8,33 +11,37 @@ client.on("message", function (topic, payload) {
 
 $(".btn-control").click(function (event) {
     let btn = $(event.target);
-    let cmd = ["go"];
-    let value = parseInt($("#distselect").val());
+    let distance_value = parseInt($("#distselect").val());
+
     switch (btn.attr("id")) {
-        case "fw":
-            cmd.push([value, 0, 0]);
+        case "forward":
+            send_go([distance_value, 0, 0], INSTANT_CHANEL);
             break;
-        case "bw":
-            cmd.push([-value, 0, 0]);
+        case "backward":
+            send_go([-distance_value, 0, 0], INSTANT_CHANEL);
             break;
-        case "rg":
-            cmd.push([0, value, 0]);
+        case "right":
+            send_go([0, distance_value, 0], INSTANT_CHANEL);
             break;
-        case "lf":
-            cmd.push([0, -value, 0]);
+        case "left":
+            send_go([0, -distance_value, 0], INSTANT_CHANEL);
             break;
         case "up":
-            cmd.push([0, 0, value]);
+            send_go([0, 0, distance_value], INSTANT_CHANEL);
             break;
         case "down":
-            cmd.push([0, 0, -value]);
+            send_go([0, 0, -distance_value], INSTANT_CHANEL);
             break;
+        case "take_photo":
+            client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["take_photo"]]));
         default:
             break;
     }
-
-    client.publish("farm/farm1/instants", JSON.stringify([cmd]))
 });
+
+function send_go(coord, chanel) {
+    client.publish(MAIN_CHANEL + chanel, JSON.stringify([["go", coord]]))
+}
 
 $(".distcontroller").change(distChange);
 $("#distselect").on('input', distChange);

@@ -8,7 +8,10 @@ import paho.mqtt.client as mqtt
 
 from client import run
 
-client = mqtt.Client()
+mqtt_client = mqtt.Client()
+
+MQTT_SERVER = "mqtt"
+HTTP_SERVER = "web"
 
 
 def on_connect(client: mqtt.Client, userdata, flags, rc: int):
@@ -33,25 +36,29 @@ def on_message(client: mqtt.Client, userdata, msg: mqtt.MQTTMessage):
 
 
 def send_logs(message):
-    client.publish("/farm/farm1/logs", message)
+    mqtt_client.publish("/farm/farm1/logs", message)
 
 
 def connect():
-    client.on_connect = on_connect
-    client.on_message = on_message
-    client.on_disconnect = on_disconnect
+    mqtt_client.on_connect = on_connect
+    mqtt_client.on_message = on_message
+    mqtt_client.on_disconnect = on_disconnect
+
+    global MQTT_SERVER
+    global HTTP_SERVER
 
     if len(sys.argv) > 1:
-        client.connect(sys.argv[1], 1883, 60)
-    else:
-        client.connect("mqtt", 1883, 60)
+        MQTT_SERVER = sys.argv[1]
+        HTTP_SERVER = sys.argv[1]
+
+    mqtt_client.connect(MQTT_SERVER, 1883, 60)
 
 
 def ping(slp: int = 60):
     print("Starting ping service\n")
     while True:
         try:
-            client.publish("farm/farm1", '["ping"]')
+            mqtt_client.publish("farm/farm1", '["ping"]')
         except:
             pass
 
@@ -66,7 +73,7 @@ def main_loop():
 def main():
     print("Starting CERESPACE Client")
     connect()
-    client.loop_start()
+    mqtt_client.loop_start()
 
     ping_process = threading.Thread(target=ping)
     ping_process.setDaemon(True)
@@ -79,7 +86,7 @@ def main():
     except Exception:
         traceback.print_exc(file=sys.stdout)
 
-    client.loop_stop()
+    mqtt_client.loop_stop()
     sys.exit(0)
 
 

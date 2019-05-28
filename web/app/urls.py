@@ -9,5 +9,6 @@ from . import views
 urlpatterns = [
     path('', views.index, name="index"),
     path('designer', views.designer, name="designer"),
-    path('controler', views.control, name="controler")
+    path('controler', views.control, name="controler"),
+    path('photo_upload', views.photo_upload, name="photo_upload")
 ] + static(settings.STATIC_URL)
