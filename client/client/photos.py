@@ -17,4 +17,6 @@ def upload_photo(photo):
     url = 'http://{}:8000/photo_upload'.format(client.HTTP_SERVER)
     files = {'photo': photo}
     r = requests.post(url, files=files)
-    print(str(r.status_code))
+    if r.status_code == 200:
+        print("Upload: ok")
+        print(r.content.decode("utf-8"))

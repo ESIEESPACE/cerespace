@@ -116,3 +116,4 @@ venv.bak/
 # cerespace project
 db/
 client/photos/*
+web/media/upload/
