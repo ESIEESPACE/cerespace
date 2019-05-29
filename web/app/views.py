@@ -4,7 +4,7 @@ import os
 import django
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpRequest, Http404, HttpResponse, HttpResponseServerError
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from cerespace_web.settings import MEDIA_ROOT
