@@ -14,9 +14,9 @@ def take_photo():
 
 
 def upload_photo(photo):
-    url = 'http://{}:8000/photo_upload'.format(client.HTTP_SERVER)
+    host = 'http://{}:8000/'.format(client.HTTP_SERVER)
+    url = host + "photo_upload"
     files = {'photo': photo}
     r = requests.post(url, files=files)
     if r.status_code == 200:
-        print("Upload: ok")
-        print(r.content.decode("utf-8"))
+        print(host + "media/upload/" + r.content.decode("utf-8"))

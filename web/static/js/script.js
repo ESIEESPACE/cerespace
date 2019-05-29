@@ -2,12 +2,20 @@ var client = mqtt.connect("ws://0.0.0.0:9001");
 
 const MAIN_CHANEL = "farm/farm1";
 const INSTANT_CHANEL = "/instants";
+const POSITION_CHANEL = "/position";
 
 client.subscribe(MAIN_CHANEL);
+client.subscribe(MAIN_CHANEL + POSITION_CHANEL);
 
 client.on("message", function (topic, payload) {
     console.log([topic, payload].join(": "));
+
+    if(topic == MAIN_CHANEL + POSITION_CHANEL) update_position(JSON.parse(payload));
 });
+
+function update_position(val) {
+    $("#position_show").text("x: " + val[0] + " y: " + val[1] + " z: " + val[2]);
+}
 
 $(".btn-control").click(function (event) {
     let btn = $(event.target);
@@ -34,13 +42,12 @@ $(".btn-control").click(function (event) {
             break;
         case "take_photo":
             client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["take_photo"]]));
-        default:
             break;
     }
 });
 
 function send_go(coord, chanel) {
-    client.publish(MAIN_CHANEL + chanel, JSON.stringify([["go", coord]]))
+    client.publish(MAIN_CHANEL + chanel, JSON.stringify([["go", coord]]));
 }
 
 $(".distcontroller").change(distChange);
@@ -53,7 +60,6 @@ function distChange(sender) {
 
     console.log(val);
     $(".distcontroller").val(val);
-
 }
 
 $(document).ready(distChange(10));

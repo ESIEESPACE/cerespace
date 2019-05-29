@@ -1,25 +1,55 @@
 {% extends 'skeleton.html' %}
 {% block body %}
-    <h1>Cerespace controler</h1>
 
     <div class="container">
-        <div class="row">
-            <div class="col ctrlpan"><button id="take_photo" class="btn btn-success btn-control">Take Photo</button></div>
-            <div class="col ctrlpan"><button id="forward" class="btn btn-success btn-control">Forward</button></div>
-            <div class="col ctrlpan"></div>
-            <div class="col ctrlpan"><button id="up" class="btn btn-success btn-control">Up</button></div>
-        </div>
-        <div class="row">
-            <div class="col ctrlpan"><button id="right" class="btn btn-success btn-control">Right</button></div>
-            <div class="col ctrlpan"><button id="backward" class="btn btn-success btn-control">Backward</button></div>
-            <div class="col ctrlpan"><button id="left" class="btn btn-success btn-control">Left</button></div>
-            <div class="col ctrlpan"><button id="down" class="btn btn-success btn-control">Down</button></div>
-        </div>
-        <div class="row">
-            <input id="distselect" type="range" max="10000" min="0" value="10" class="distcontroller">
-            <input type="number" max="10000" min="0" class="distcontroller">
-            <label> mm</label>
-        </div>
+        <h1>Cerespace controler</h1>
+        <table id="matrix">
+            <tr>
+                <td>
+                    <button id="take_photo" class="btn btn-success btn-control">Take Photo</button>
+                </td>
+                <td></td>
+                <td></td>
+                <td>
+                    <button id="forward" class="btn btn-success btn-control">Forward</button>
+                </td>
+                <td></td>
+                <td></td>
+                <td>
+                    <button id="up" class="btn btn-success btn-control">Up</button>
+                </td>
+            </tr>
+
+            <tr>
+                <td></td>
+                <td></td>
+                <td>
+                    <button id="right" class="btn btn-success btn-control">Right</button>
+                </td>
+                <td>
+                    <button id="backward" class="btn btn-success btn-control">Backward</button>
+                </td>
+                <td>
+                    <button id="left" class="btn btn-success btn-control">Left</button>
+                </td>
+                <td></td>
+                <td>
+                    <button id="down" class="btn btn-success btn-control">Down</button>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="7" id="position_show">
+                    x: 500 y: 500 z: 500
+                </td>
+            </tr>
+            <tr>
+                <td colspan="7">
+                    <input id="distselect" type="range" max="10000" min="0" value="10" class="distcontroller">
+                    <input type="number" max="10000" min="0" class="form-control distcontroller">
+                    <label> mm</label>
+                </td>
+            </tr>
+        </table>
     </div>
 {% endblock %}
 
