@@ -1,6 +1,5 @@
 import json
 import sys
-import threading
 import time
 import traceback
 
@@ -8,7 +7,7 @@ import paho.mqtt.client as mqtt
 
 from client import run
 
-mqtt_client = mqtt.Client()
+mqtt_client = mqtt.Client("farm_client")
 
 MQTT_SERVER = "mqtt"
 HTTP_SERVER = "web"
@@ -18,6 +17,7 @@ def on_connect(client: mqtt.Client, userdata, flags, rc: int):
     print("Connected with result code " + str(rc))
     client.subscribe("farm/farm1")
     client.subscribe("farm/farm1/instants")
+    client.subscribe("farm/farm1/ping")
 
 
 def on_disconnect(client, userdata, rc: int):
@@ -25,14 +25,21 @@ def on_disconnect(client, userdata, rc: int):
 
 
 def on_message(client: mqtt.Client, userdata, msg: mqtt.MQTTMessage):
-    if msg.topic == "farm/farm1/instants":
-        try:
-            commands = json.loads(msg.payload.decode("utf-8"))
-            for command in commands:
-                run.run_command(command)
-        except Exception:
-            print(msg.payload.decode("utf-8"))
-            traceback.print_exc()
+    try:
+        data = msg.payload.decode("utf-8")
+        print(msg.topic + ":" + data)
+        if msg.topic == "farm/farm1/instants":
+            try:
+                commands = json.loads(data)
+                for command in commands:
+                    run.run_command(command)
+            except Exception:
+                print(data)
+                traceback.print_exc()
+        elif msg.topic == "farm/farm1/ping" and data == "ping":
+            client.publish("farm/farm1/ping", "pong")
+    except Exception:
+        traceback.print_exc()
 
 
 def send_logs(message):
@@ -54,17 +61,6 @@ def connect():
     mqtt_client.connect(MQTT_SERVER, 1883, 60)
 
 
-def ping(slp: int = 60):
-    print("Starting ping service\n")
-    while True:
-        try:
-            mqtt_client.publish("farm/farm1", '["ping"]')
-        except:
-            pass
-
-        time.sleep(slp)
-
-
 def main_loop():
     while True:
         time.sleep(1)
@@ -74,10 +70,6 @@ def main():
     print("Starting CERESPACE Client")
     connect()
     mqtt_client.loop_start()
-
-    ping_process = threading.Thread(target=ping)
-    ping_process.setDaemon(True)
-    ping_process.start()
 
     try:
         main_loop()

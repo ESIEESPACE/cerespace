@@ -3,14 +3,22 @@ var client = mqtt.connect("ws://0.0.0.0:9001");
 const MAIN_CHANEL = "farm/farm1";
 const INSTANT_CHANEL = "/instants";
 const POSITION_CHANEL = "/position";
+const PING_CHANEL = "/ping";
 
 client.subscribe(MAIN_CHANEL);
 client.subscribe(MAIN_CHANEL + POSITION_CHANEL);
+client.subscribe(MAIN_CHANEL + PING_CHANEL);
 
 client.on("message", function (topic, payload) {
-    console.log([topic, payload].join(": "));
-
-    if(topic == MAIN_CHANEL + POSITION_CHANEL) update_position(JSON.parse(payload));
+    switch (topic) {
+        case MAIN_CHANEL + POSITION_CHANEL:
+            update_position(JSON.parse(payload));
+            break;
+        case MAIN_CHANEL:
+            break;
+        default:
+            console.log([topic, payload].join(": "));
+    }
 });
 
 function update_position(val) {
@@ -58,7 +66,6 @@ function distChange(sender) {
     if (typeof sender.target != "undefined") val = $(sender.target).val();
     else val = sender;
 
-    console.log(val);
     $(".distcontroller").val(val);
 }
 
