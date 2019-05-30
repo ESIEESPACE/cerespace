@@ -1,8 +1,11 @@
 import time
+import serial
 import traceback
 
 from client import photos
 from client import client
+
+ser: serial.Serial = serial.Serial()
 
 
 def command_to_gcode(command) -> str:
@@ -68,3 +71,15 @@ def run_command(command):
             print("returned G-CODE : {}".format(command_to_gcode(command)))
         except ValueError:
             traceback.print_exc()
+
+
+def gcode_interpreter(command: str):
+    pass
+
+
+def connect():
+    global ser
+    ser.baudrate = 19200
+    ser.port = '/dev/USB0'
+    ser.open()
+

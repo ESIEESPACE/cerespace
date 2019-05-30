@@ -1,5 +1,6 @@
 import json
 import sys
+import threading
 import time
 import traceback
 
@@ -27,7 +28,6 @@ def on_disconnect(client, userdata, rc: int):
 def on_message(client: mqtt.Client, userdata, msg: mqtt.MQTTMessage):
     try:
         data = msg.payload.decode("utf-8")
-        print(msg.topic + ":" + data)
         if msg.topic == "farm/farm1/instants":
             try:
                 commands = json.loads(data)
@@ -38,6 +38,8 @@ def on_message(client: mqtt.Client, userdata, msg: mqtt.MQTTMessage):
                 traceback.print_exc()
         elif msg.topic == "farm/farm1/ping" and data == "ping":
             client.publish("farm/farm1/ping", "pong")
+        else:
+            print(data)
     except Exception:
         traceback.print_exc()
 
@@ -47,6 +49,11 @@ def send_logs(message):
 
 
 def connect():
+    try:
+        run.connect()
+    except:
+        print("Can't connect to serial port")
+        traceback.print_exc()
     mqtt_client.on_connect = on_connect
     mqtt_client.on_message = on_message
     mqtt_client.on_disconnect = on_disconnect
@@ -63,7 +70,14 @@ def connect():
 
 def main_loop():
     while True:
-        time.sleep(1)
+        try:
+            line = run.ser.readline()
+            if line is not None or line is not "":
+                run.gcode_interpreter(line)
+            else:
+                time.sleep(1)
+        except Exception:
+            time.sleep(1)
 
 
 def main():
