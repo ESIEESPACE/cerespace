@@ -7,6 +7,91 @@ from client import client
 
 ser = serial.Serial()
 
+parameters = {
+    2: "1",  # PARAM_CONFIG_OK
+    3: "0",  # PARAM_USE_EEPROM
+    4: "0",  # PARAM_E_STOP_ON_MOV_ERR
+    5: "3",  # PARAM_MOV_NR_RETRY
+    11: "120",  # MOVEMENT_TIMEOUT_X
+    12: "120",  # MOVEMENT_TIMEOUT_Y
+    13: "120",  # MOVEMENT_TIMEOUT_Z
+    15: "0",  # MOVEMENT_KEEP_ACTIVE_X
+    16: "0",  # MOVEMENT_KEEP_ACTIVE_Y
+    17: "0",  # MOVEMENT_KEEP_ACTIVE_Z
+    18: "0",  # MOVEMENT_HOME_AT_BOOT_X
+    19: "0",  # MOVEMENT_HOME_AT_BOOT_Y
+    20: "0",  # MOVEMENT_HOME_AT_BOOT_Z
+    21: "0",  # MOVEMENT_INVERT_ENDPOINTS_X
+    22: "0",  # MOVEMENT_INVERT_ENDPOINTS_Y
+    23: "0",  # MOVEMENT_INVERT_ENDPOINTS_Z
+    25: "1",  # MOVEMENT_ENABLE_ENDPOINTS_X
+    26: "1",  # MOVEMENT_ENABLE_ENDPOINTS_Y
+    27: "1",  # MOVEMENT_ENABLE_ENDPOINTS_Z
+    31: "0",  # MOVEMENT_INVERT_MOTOR_X
+    32: "0",  # MOVEMENT_INVERT_MOTOR_Y
+    33: "0",  # MOVEMENT_INVERT_MOTOR_Z
+    36: "1",  # MOVEMENT_SECONDARY_MOTOR_X
+    37: "1",  # MOVEMENT_SECONDARY_MOTOR_INVERT_X
+    41: "",  # MOVEMENT_STEPS_ACC_DEC_X
+    42: "",  # MOVEMENT_STEPS_ACC_DEC_Y
+    43: "",  # MOVEMENT_STEPS_ACC_DEC_Z
+    45: "1",  # MOVEMENT_STOP_AT_HOME_X
+    46: "1",  # MOVEMENT_STOP_AT_HOME_Y
+    47: "1",  # MOVEMENT_STOP_AT_HOME_Z
+    51: "",  # MOVEMENT_HOME_UP_X
+    52: "",  # MOVEMENT_HOME_UP_Y
+    53: "",  # MOVEMENT_HOME_UP_Z
+    55: "5",  # MOVEMENT_STEP_PER_MM_X
+    56: "5",  # MOVEMENT_STEP_PER_MM_Y
+    57: "25",  # MOVEMENT_STEP_PER_MM_Z
+    61: "10",  # MOVEMENT_MIN_SPD_X
+    62: "10",  # MOVEMENT_MIN_SPD_Y
+    63: "2",  # MOVEMENT_MIN_SPD_Z
+    65: "10",  # MOVEMENT_HOME_SPD_X
+    66: "10",  # MOVEMENT_HOME_SPD_Y
+    67: "2",  # MOVEMENT_HOME_SPD_Z
+    71: "80",  # MOVEMENT_MAX_SPD_X
+    72: "80",  # MOVEMENT_MAX_SPD_Y
+    73: "16",  # MOVEMENT_MAX_SPD_Z
+    75: "",  # MOVEMENT_INVERT_2_ENDPOINTS_X
+    76: "",  # MOVEMENT_INVERT_2_ENDPOINTS_Y
+    77: "",  # MOVEMENT_INVERT_2_ENDPOINTS_Z
+    101: "0",  # ENCODER_ENABLED_X
+    102: "0",  # ENCODER_ENABLED_Y
+    103: "0",  # ENCODER_ENABLED_Z
+    105: "",  # ENCODER_TYPE_X
+    106: "",  # ENCODER_TYPE_Y
+    107: "",  # ENCODER_TYPE_Z
+    111: "",  # ENCODER_MISSED_STEPS_MAX_X
+    112: "",  # ENCODER_MISSED_STEPS_MAX_Y
+    113: "",  # ENCODER_MISSED_STEPS_MAX_Z
+    115: "",  # ENCODER_SCALING_X
+    116: "",  # ENCODER_SCALING_Y
+    117: "",  # ENCODER_SCALING_Z
+    121: "",  # ENCODER_MISSED_STEPS_DECAY_X
+    122: "",  # ENCODER_MISSED_STEPS_DECAY_Y
+    123: "",  # ENCODER_MISSED_STEPS_DECAY_Z
+    125: "",  # ENCODER_USE_FOR_POS_X
+    126: "",  # ENCODER_USE_FOR_POS_Y
+    127: "",  # ENCODER_USE_FOR_POS_Z
+    131: "",  # ENCODER_INVERT_X
+    132: "",  # ENCODER_INVERT_Y
+    133: "",  # ENCODER_INVERT_Z
+    141: "",  # MOVEMENT_AXIS_NR_STEPS_X
+    142: "",  # MOVEMENT_AXIS_NR_STEPS_Y
+    143: "",  # MOVEMENT_AXIS_NR_STEPS_Z
+    145: "1",  # MOVEMENT_STOP_AT_MAX_X
+    146: "1",  # MOVEMENT_STOP_AT_MAX_Y
+    147: "1",  # MOVEMENT_STOP_AT_MAX_Z
+    201: "",  # PIN_GUARD_1_PIN_NR
+    202: "",  # PIN_GUARD_1_TIME_OUT
+    203: "",  # PIN_GUARD_1_ACTIVE_STATE
+    205: "",  # PIN_GUARD_2_PIN_NR
+    206: "",  # PIN_GUARD_2_TIME_OUT
+    207: "",  # PIN_GUARD_2_ACTIVE_STATE
+
+}
+
 
 def command_to_gcode(command) -> str:
     if command[0] == "emergency":
@@ -165,7 +250,12 @@ def gcode_interpreter(command: str):
 
 
 def send_params():
-    pass
+    for param_id in range(3, 224):
+        try:
+            ser.write("F22 P" + param_id + " V" + parameters[param_id] + "\r\n")
+        except:
+            ""
+    ser.write("F22 P2 V1\r\n")
 
 
 def connect():
