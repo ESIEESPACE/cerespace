@@ -22,14 +22,3 @@ services:
       - "8000:8000"
     depends_on:
       - mqtt
-
-  client:
-    build: ./client
-    command: python main.py
-    env_file:
-      - .env
-    volumes:
-      - ./client:/code
-      - /dev:/dev
-    depends_on:
-      - mqtt
