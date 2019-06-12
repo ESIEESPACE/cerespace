@@ -27,8 +27,8 @@ parameters = {
     25: "1",  # MOVEMENT_ENABLE_ENDPOINTS_X
     26: "1",  # MOVEMENT_ENABLE_ENDPOINTS_Y
     27: "1",  # MOVEMENT_ENABLE_ENDPOINTS_Z
-    31: "0",  # MOVEMENT_INVERT_MOTOR_X
-    32: "0",  # MOVEMENT_INVERT_MOTOR_Y
+    31: "1",  # MOVEMENT_INVERT_MOTOR_X
+    32: "1",  # MOVEMENT_INVERT_MOTOR_Y
     33: "0",  # MOVEMENT_INVERT_MOTOR_Z
     36: "1",  # MOVEMENT_SECONDARY_MOTOR_X
     37: "1",  # MOVEMENT_SECONDARY_MOTOR_INVERT_X
@@ -44,13 +44,13 @@ parameters = {
     55: "5",  # MOVEMENT_STEP_PER_MM_X
     56: "5",  # MOVEMENT_STEP_PER_MM_Y
     57: "25",  # MOVEMENT_STEP_PER_MM_Z
-    61: "10",  # MOVEMENT_MIN_SPD_X
-    62: "10",  # MOVEMENT_MIN_SPD_Y
+    61: "50",  # MOVEMENT_MIN_SPD_X
+    62: "50",  # MOVEMENT_MIN_SPD_Y
     63: "2",  # MOVEMENT_MIN_SPD_Z
-    65: "10",  # MOVEMENT_HOME_SPD_X
-    66: "10",  # MOVEMENT_HOME_SPD_Y
-    67: "2",  # MOVEMENT_HOME_SPD_Z
-    71: "80",  # MOVEMENT_MAX_SPD_X
+    65: "100",  # MOVEMENT_HOME_SPD_X
+    66: "80",  # MOVEMENT_HOME_SPD_Y
+    67: "20",  # MOVEMENT_HOME_SPD_Z
+    71: "150",  # MOVEMENT_MAX_SPD_X
     72: "80",  # MOVEMENT_MAX_SPD_Y
     73: "16",  # MOVEMENT_MAX_SPD_Z
     75: "",  # MOVEMENT_INVERT_2_ENDPOINTS_X
@@ -128,6 +128,8 @@ def command_to_gcode(command) -> str:
 
     elif command[0] == "getpos" and len(command) == 1:
         return "F82"
+    elif command[0] == "reset_emergency" and len(command) == 1:
+        return "F09"
 
     else:
         raise ValueError("Invalid command : " + str(command))
@@ -153,10 +155,13 @@ def run_command(command):
 
     elif command[0] == "take_photo":
         photos.take_photo()
+    elif command[0] == "send_params":
+        send_params()
 
     else:
         try:
             print("returned G-CODE : {}".format(command_to_gcode(command)))
+            ser.write((command_to_gcode(command) + "\r\n").encode())
         except ValueError:
             traceback.print_exc()
 
@@ -173,7 +178,11 @@ def gcode_interpreter(command: str):
             # https://github.com/FarmBot/farmbot-arduino-firmware/#parameters-for-commands
             param = param.replace(' ', '')
             if param.startswith('R'):
-                command_type = int(param.replace('R', ''))
+                try:
+                    command_type = int(param.replace('R', ''))
+                except:
+                    traceback.print_exc()
+                    print(param)
             elif param.startswith('XA'):
                 data[0] = param.replace('XA', '')
             elif param.startswith('XB'):
@@ -252,10 +261,16 @@ def gcode_interpreter(command: str):
 def send_params():
     for param_id in range(3, 224):
         try:
-            ser.write("F22 P" + param_id + " V" + parameters[param_id] + "\r\n")
-        except:
+            if parameters[param_id] != "":
+                ser.write("F22 P{} V{} \r\n".format(param_id, parameters[param_id]).encode())
+                time.sleep(0.1)
+                print("Send command: " + str(param_id))
+        except KeyError:
             ""
-    ser.write("F22 P2 V1\r\n")
+        except:
+            traceback.print_exc()
+    ser.write("F22 P2 V1\r\n".encode())
+    print("Send params")
 
 
 def connect():
