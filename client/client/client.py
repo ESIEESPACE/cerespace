@@ -47,7 +47,6 @@ def on_message(client: mqtt.Client, userdata, msg: mqtt.MQTTMessage):
 def send_logs(message):
     mqtt_client.publish("/farm/farm1/logs", message)
 
-
 def connect():
     try:
         run.connect()

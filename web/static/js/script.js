@@ -4,16 +4,23 @@ const MAIN_CHANEL = "farm/farm1";
 const INSTANT_CHANEL = "/instants";
 const POSITION_CHANEL = "/position";
 const PING_CHANEL = "/ping";
+const EMERGENCY_CHANEL = "/emergency";
 
 client.subscribe(MAIN_CHANEL);
 client.subscribe(MAIN_CHANEL + POSITION_CHANEL);
 client.subscribe(MAIN_CHANEL + PING_CHANEL);
+client.subscribe(MAIN_CHANEL + EMERGENCY_CHANEL);
+
+let emergency_btn = $("#emergency_btn");
+let unlock_btn = $("#unlock_btn");
 
 client.on("message", function (topic, payload) {
     switch (topic) {
         case MAIN_CHANEL + POSITION_CHANEL:
             update_position(JSON.parse(payload));
             break;
+        case MAIN_CHANEL + EMERGENCY_CHANEL:
+            update_EStatus(parseInt(payload));
         case MAIN_CHANEL:
             break;
         default:
@@ -22,7 +29,22 @@ client.on("message", function (topic, payload) {
 });
 
 function update_position(val) {
-    $("#position_show").text("x: " + val[0] + " y: " + val[1] + " z: " + val[2]);
+    $("#position_show").text("x: " + val["X"] + " y: " + val["Y"] + " z: " + val["Z"]);
+}
+
+function update_EStatus(val) {
+    switch (val) {
+
+        case 0:
+            emergency_btn.show();
+            unlock_btn.hide();
+            break;
+        case 1:
+            emergency_btn.hide();
+            unlock_btn.show();
+            break;
+
+    }
 }
 
 $(".btn-control").click(function (event) {
@@ -61,6 +83,13 @@ function send_go(coord, chanel) {
 $(".distcontroller").change(distChange);
 $("#distselect").on('input', distChange);
 
+emergency_btn.click(function() {
+    client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["emergency"]]));
+});
+unlock_btn.click(function() {
+    client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["reset_emergency"]]));
+});
+
 function distChange(sender) {
     let val = "";
     if (typeof sender.target != "undefined") val = $(sender.target).val();
@@ -69,4 +98,7 @@ function distChange(sender) {
     $(".distcontroller").val(val);
 }
 
-$(document).ready(distChange(10));
+$(document).ready(function () {
+    distChange(10);
+    update_EStatus(0);
+});

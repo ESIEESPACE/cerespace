@@ -1,6 +1,7 @@
 import time
 import serial
 import traceback
+import json
 
 from client import photos
 from client import client
@@ -18,9 +19,9 @@ parameters = {
     15: "0",  # MOVEMENT_KEEP_ACTIVE_X
     16: "0",  # MOVEMENT_KEEP_ACTIVE_Y
     17: "0",  # MOVEMENT_KEEP_ACTIVE_Z
-    18: "0",  # MOVEMENT_HOME_AT_BOOT_X
-    19: "0",  # MOVEMENT_HOME_AT_BOOT_Y
-    20: "0",  # MOVEMENT_HOME_AT_BOOT_Z
+    18: "1",  # MOVEMENT_HOME_AT_BOOT_X
+    19: "1",  # MOVEMENT_HOME_AT_BOOT_Y
+    20: "1",  # MOVEMENT_HOME_AT_BOOT_Z
     21: "0",  # MOVEMENT_INVERT_ENDPOINTS_X
     22: "0",  # MOVEMENT_INVERT_ENDPOINTS_Y
     23: "0",  # MOVEMENT_INVERT_ENDPOINTS_Z
@@ -46,13 +47,13 @@ parameters = {
     57: "25",  # MOVEMENT_STEP_PER_MM_Z
     61: "50",  # MOVEMENT_MIN_SPD_X
     62: "50",  # MOVEMENT_MIN_SPD_Y
-    63: "2",  # MOVEMENT_MIN_SPD_Z
+    63: "20",  # MOVEMENT_MIN_SPD_Z
     65: "100",  # MOVEMENT_HOME_SPD_X
     66: "80",  # MOVEMENT_HOME_SPD_Y
     67: "20",  # MOVEMENT_HOME_SPD_Z
     71: "150",  # MOVEMENT_MAX_SPD_X
     72: "80",  # MOVEMENT_MAX_SPD_Y
-    73: "16",  # MOVEMENT_MAX_SPD_Z
+    73: "",  # MOVEMENT_MAX_SPD_Z
     75: "",  # MOVEMENT_INVERT_2_ENDPOINTS_X
     76: "",  # MOVEMENT_INVERT_2_ENDPOINTS_Y
     77: "",  # MOVEMENT_INVERT_2_ENDPOINTS_Z
@@ -95,6 +96,7 @@ parameters = {
 
 def command_to_gcode(command) -> str:
     if command[0] == "emergency":
+        client.mqtt_client.publish("farm/farm1/emergency", 0)
         return "E"
 
     elif command[0] == "fakeapproved":
@@ -242,11 +244,16 @@ def gcode_interpreter(command: str):
             print("Pin : " + data[0] + " " + data[1])
         elif command_type == 82:
             print("Motor coord : X=" + data[0] + " Y=" + data[1] + " Z=" + data[2])
+            client.mqtt_client.publish("farm/farm1/position",
+                                       "{\"X\": " + data[0] + ", \"Y\": " + data[1] + ", \"Z\": " + data[2] + "}")
         elif command_type == 81:
             print("End stops X:" + data[0] + " " + data[1] + " Y:" + data[2] + " " + data[3] + " Z:" + data[4] + " " +
                   data[5])
         elif command_type == 84 or command_type == 85:
             pass
+        elif command_type == 87:
+            client.mqtt_client.publish("farm/farm1/emergency", 1)
+            print("Emergency return")
         elif command_type == 88:
             print("No params")
             send_params()
