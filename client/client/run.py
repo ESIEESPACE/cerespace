@@ -47,13 +47,13 @@ parameters = {
     57: "25",  # MOVEMENT_STEP_PER_MM_Z
     61: "50",  # MOVEMENT_MIN_SPD_X
     62: "50",  # MOVEMENT_MIN_SPD_Y
-    63: "20",  # MOVEMENT_MIN_SPD_Z
+    63: "50",  # MOVEMENT_MIN_SPD_Z
     65: "100",  # MOVEMENT_HOME_SPD_X
     66: "80",  # MOVEMENT_HOME_SPD_Y
-    67: "20",  # MOVEMENT_HOME_SPD_Z
+    67: "80",  # MOVEMENT_HOME_SPD_Z
     71: "150",  # MOVEMENT_MAX_SPD_X
     72: "80",  # MOVEMENT_MAX_SPD_Y
-    73: "",  # MOVEMENT_MAX_SPD_Z
+    73: "80",  # MOVEMENT_MAX_SPD_Z
     75: "",  # MOVEMENT_INVERT_2_ENDPOINTS_X
     76: "",  # MOVEMENT_INVERT_2_ENDPOINTS_Y
     77: "",  # MOVEMENT_INVERT_2_ENDPOINTS_Z
@@ -131,6 +131,7 @@ def command_to_gcode(command) -> str:
     elif command[0] == "getpos" and len(command) == 1:
         return "F82"
     elif command[0] == "reset_emergency" and len(command) == 1:
+        client.mqtt_client.publish("farm/farm1/emergency", 0)
         return "F09"
 
     else:
@@ -174,7 +175,13 @@ def gcode_interpreter(command: str):
         command_dec = command.split(" ")
         command_type = 0
 
-        data = {}
+        data = {
+            "X": "",
+            "Y": "",
+            "Z": "",
+            "P": "",
+            "Q": "",
+        }
 
         for param in command_dec:
             # https://github.com/FarmBot/farmbot-arduino-firmware/#parameters-for-commands
@@ -186,27 +193,29 @@ def gcode_interpreter(command: str):
                     traceback.print_exc()
                     print(param)
             elif param.startswith('XA'):
-                data[0] = param.replace('XA', '')
+                data["XA"] = param.replace('XA', '')
             elif param.startswith('XB'):
-                data[1] = param.replace('XB', '')
+                data["XB"] = param.replace('XB', '')
             elif param.startswith('YA'):
-                data[2] = param.replace('YA', '')
+                data["YA"] = param.replace('YA', '')
             elif param.startswith('YB'):
-                data[3] = param.replace('YB', '')
+                data["YB"] = param.replace('YB', '')
             elif param.startswith('ZA'):
-                data[4] = param.replace('ZA', '')
+                data["ZA"] = param.replace('ZA', '')
             elif param.startswith('ZB'):
-                data[5] = param.replace('ZB', '')
+                data["ZB"] = param.replace('ZB', '')
             elif param.startswith('X'):
-                data[0] = param.replace('X', '')
+                data["X"] = param.replace('X', '')
             elif param.startswith('Y'):
-                data[1] = param.replace('Y', '')
+                data["Y"] = param.replace('Y', '')
             elif param.startswith('Z'):
-                data[2] = param.replace('Z', '')
+                data["Z"] = param.replace('Z', '')
             elif param.startswith('P'):
-                data[0] = param.replace('P', '')
+                data["P"] = param.replace('P', '')
             elif param.startswith('V'):
-                data[1] = param.replace('V', '')
+                data["V"] = param.replace('V', '')
+            elif param.startswith("Q"):
+                data["Q"] = param.replace('Q', '')
 
         if command_type == 0:
             print("Idle")
@@ -219,10 +228,15 @@ def gcode_interpreter(command: str):
         elif command_type == 4:
             print("Command running")
         elif command_type == 5:
-            print("Motor state : X=" + data[0] + " Y=" + data[1] + " Z=" + data[2])
+            try:
+                print("Motor state : X=" + get_motor_state(data["X"]) + " Y=" + get_motor_state(
+                    data["Y"]) + " Z=" + get_motor_state(data["Z"]))
+            except KeyError:
+                traceback.print_exc()
+                print(command)
             # https://github.com/FarmBot/farmbot-arduino-firmware/#axis-states-r05
         elif command_type == 6:
-            print("Calibration state : X=" + data[0] + " Y=" + data[1] + " Z=" + data[2])
+            print("Calibration state : X=" + data["X"] + " Y=" + data["Y"] + " Z=" + data["Z"])
             # https://github.com/FarmBot/farmbot-arduino-firmware/#calibration-states-r06
         elif command_type == 7:
             print("Retry movement")
@@ -237,18 +251,19 @@ def gcode_interpreter(command: str):
         elif command_type == 13:
             print("Z axis homing complete")
         elif command_type == 21:
-            print("Parameter : " + data[0] + " " + data[1])
+            print("Parameter : " + data["P"] + " " + data["V"])
         elif command_type == 31:
-            print("Status : " + data[0] + " " + data[1])
+            print("Status : " + data["P"] + " " + data["V"])
         elif command_type == 41:
-            print("Pin : " + data[0] + " " + data[1])
+            print("Pin : " + data["P"] + " " + data["V"])
         elif command_type == 82:
-            print("Motor coord : X=" + data[0] + " Y=" + data[1] + " Z=" + data[2])
+            print("Motor coord : X=" + data["X"] + " Y=" + data["Y"] + " Z=" + data["Z"])
             client.mqtt_client.publish("farm/farm1/position",
-                                       "{\"X\": " + data[0] + ", \"Y\": " + data[1] + ", \"Z\": " + data[2] + "}")
+                                       "{\"X\": " + data["X"] + ", \"Y\": " + data["Y"] + ", \"Z\": " + data["Z"] + "}")
         elif command_type == 81:
-            print("End stops X:" + data[0] + " " + data[1] + " Y:" + data[2] + " " + data[3] + " Z:" + data[4] + " " +
-                  data[5])
+            print("End stops X:" + data["XA"] + " " + data["XB"] + " Y:" + data["YA"] + " " + data["YB"] + " Z:" + data[
+                "ZA"] + " " +
+                  data["ZB"])
         elif command_type == 84 or command_type == 85:
             pass
         elif command_type == 87:
@@ -285,3 +300,25 @@ def connect():
     ser.baudrate = 115200
     ser.port = '/dev/ttyACM0'
     ser.open()
+
+
+def get_motor_state(val) -> str:
+    if val == "":
+        return ""
+    val = int(val)
+    if val == 0:
+        return "Idle"
+    elif val == 1:
+        return "Starting motor"
+    elif val == 2:
+        return "Accelerating"
+    elif val == 3:
+        return "Cruising"
+    elif val == 4:
+        return "Decelerating"
+    elif val == 5:
+        return "Stopping motor"
+    elif val == 6:
+        return "Crawling"
+    else:
+        return "Unknown state"

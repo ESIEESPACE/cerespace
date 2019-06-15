@@ -5,10 +5,10 @@ from django.urls import path
 from cerespace_web import settings
 from . import views
 
-
 urlpatterns = [
-    path('', views.index, name="index"),
-    path('designer', views.designer, name="designer"),
-    path('controler', views.control, name="controler"),
-    path('photo_upload', views.photo_upload, name="photo_upload")
-] + static(settings.STATIC_URL)
+                  path('', views.index, name="index"),
+                  path('designer', views.designer, name="designer"),
+                  path('controler', views.control, name="controler"),
+                  path('photo_upload', views.photo_upload, name="photo_upload"),
+                  path('settings', views.settings, name="settings"),
+              ] + static(settings.STATIC_URL)

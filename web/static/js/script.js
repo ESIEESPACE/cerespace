@@ -6,6 +6,8 @@ const POSITION_CHANEL = "/position";
 const PING_CHANEL = "/ping";
 const EMERGENCY_CHANEL = "/emergency";
 
+var coord = [0, 0, 0];
+
 client.subscribe(MAIN_CHANEL);
 client.subscribe(MAIN_CHANEL + POSITION_CHANEL);
 client.subscribe(MAIN_CHANEL + PING_CHANEL);
@@ -13,6 +15,14 @@ client.subscribe(MAIN_CHANEL + EMERGENCY_CHANEL);
 
 let emergency_btn = $("#emergency_btn");
 let unlock_btn = $("#unlock_btn");
+
+let go_coord_btn = $("#go_coord");
+
+let homing_btn = [ $("#home_x_btn"), $("#home_y_btn"), $("#home_z_btn")];
+
+let xval = $("#xval");
+let yval = $("#yval");
+let zval = $("#zval");
 
 client.on("message", function (topic, payload) {
     switch (topic) {
@@ -29,7 +39,11 @@ client.on("message", function (topic, payload) {
 });
 
 function update_position(val) {
-    $("#position_show").text("x: " + val["X"] + " y: " + val["Y"] + " z: " + val["Z"]);
+    coord = [val["X"], val["Y"], val["Z"]];
+
+    xval.val(val["X"]);
+    yval.val(val["Y"]);
+    zval.val(val["Z"]);
 }
 
 function update_EStatus(val) {
@@ -53,22 +67,22 @@ $(".btn-control").click(function (event) {
 
     switch (btn.attr("id")) {
         case "forward":
-            send_go([distance_value, 0, 0], INSTANT_CHANEL);
+            send_relative_go([distance_value, 0, 0], INSTANT_CHANEL);
             break;
         case "backward":
-            send_go([-distance_value, 0, 0], INSTANT_CHANEL);
+            send_relative_go([-distance_value, 0, 0], INSTANT_CHANEL);
             break;
         case "right":
-            send_go([0, distance_value, 0], INSTANT_CHANEL);
+            send_relative_go([0, distance_value, 0], INSTANT_CHANEL);
             break;
         case "left":
-            send_go([0, -distance_value, 0], INSTANT_CHANEL);
+            send_relative_go([0, -distance_value, 0], INSTANT_CHANEL);
             break;
         case "up":
-            send_go([0, 0, distance_value], INSTANT_CHANEL);
+            send_relative_go([0, 0, distance_value], INSTANT_CHANEL);
             break;
         case "down":
-            send_go([0, 0, -distance_value], INSTANT_CHANEL);
+            send_relative_go([0, 0, -distance_value], INSTANT_CHANEL);
             break;
         case "take_photo":
             client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["take_photo"]]));
@@ -76,18 +90,39 @@ $(".btn-control").click(function (event) {
     }
 });
 
-function send_go(coord, chanel) {
-    client.publish(MAIN_CHANEL + chanel, JSON.stringify([["go", coord]]));
+function send_relative_go(rel_coord, chanel) {
+    let temp_coord = [0, 0, 0];
+    for (let i = 0; i < 3; i++) {
+        temp_coord[i] = coord[i] + rel_coord[i];
+    }
+    client.publish(MAIN_CHANEL + chanel, JSON.stringify([["go", temp_coord]]));
 }
 
 $(".distcontroller").change(distChange);
 $("#distselect").on('input', distChange);
 
-emergency_btn.click(function() {
+emergency_btn.click(function () {
     client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["emergency"]]));
 });
-unlock_btn.click(function() {
+unlock_btn.click(function () {
     client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["reset_emergency"]]));
+});
+
+go_coord_btn.click(function () {
+    let temp_coord = [xval.val(), yval.val(), zval.val()];
+    client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["go", temp_coord]]))
+});
+
+homing_btn[0].click(function () {
+    client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["home", "X"]]))
+});
+
+homing_btn[1].click(function () {
+    client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["home", "Y"]]))
+});
+
+homing_btn[2].click(function () {
+    client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["home", "Z"]]))
 });
 
 function distChange(sender) {

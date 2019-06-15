@@ -39,13 +39,16 @@
             </tr>
             <tr>
                 <td colspan="7" id="position_show">
-                    x: Unknown y: Unknown z: Unknown
+                    <label>X: </label><input type="number" class="form-control coord" id="xval" value="0">
+                    <label>Y: </label><input type="number" class="form-control coord" id="yval" value="0">
+                    <label>Z: </label><input type="number" class="form-control coord" id="zval" value="0">
+                    <button id="go_coord" class="btn btn-outline-success">Go</button>
                 </td>
             </tr>
             <tr>
                 <td colspan="7">
-                    <input id="distselect" type="range" max="10000" min="0" value="10" class="distcontroller">
-                    <input type="number" max="10000" min="0" class="form-control distcontroller">
+                    <input id="distselect" type="range" max="1000" min="0" value="10" class="distcontroller">
+                    <input type="number" max="20000" min="0" class="form-control distcontroller">
                     <label> mm</label>
                 </td>
             </tr>

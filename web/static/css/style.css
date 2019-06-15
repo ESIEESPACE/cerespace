@@ -27,6 +27,16 @@
     display: inline;
 }
 
+.coord{
+    display: inline;
+    width: 100px;
+    margin: 10px;
+}
+
+.btn {
+    margin-right: 5px;
+}
+
 h1 {
     margin-bottom: 20px;
 }
