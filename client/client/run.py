@@ -11,7 +11,7 @@ ser = serial.Serial()
 parameters = {
     2: "1",  # PARAM_CONFIG_OK
     3: "0",  # PARAM_USE_EEPROM
-    4: "0",  # PARAM_E_STOP_ON_MOV_ERR
+    4: "1",  # PARAM_E_STOP_ON_MOV_ERR
     5: "3",  # PARAM_MOV_NR_RETRY
     11: "120",  # MOVEMENT_TIMEOUT_X
     12: "120",  # MOVEMENT_TIMEOUT_Y
@@ -38,7 +38,7 @@ parameters = {
     43: "",  # MOVEMENT_STEPS_ACC_DEC_Z
     45: "1",  # MOVEMENT_STOP_AT_HOME_X
     46: "1",  # MOVEMENT_STOP_AT_HOME_Y
-    47: "1",  # MOVEMENT_STOP_AT_HOME_Z
+    47: "0",  # MOVEMENT_STOP_AT_HOME_Z
     51: "",  # MOVEMENT_HOME_UP_X
     52: "",  # MOVEMENT_HOME_UP_Y
     53: "",  # MOVEMENT_HOME_UP_Z
@@ -53,7 +53,7 @@ parameters = {
     67: "80",  # MOVEMENT_HOME_SPD_Z
     71: "150",  # MOVEMENT_MAX_SPD_X
     72: "80",  # MOVEMENT_MAX_SPD_Y
-    73: "80",  # MOVEMENT_MAX_SPD_Z
+    73: "100",  # MOVEMENT_MAX_SPD_Z
     75: "",  # MOVEMENT_INVERT_2_ENDPOINTS_X
     76: "",  # MOVEMENT_INVERT_2_ENDPOINTS_Y
     77: "",  # MOVEMENT_INVERT_2_ENDPOINTS_Z
@@ -103,6 +103,8 @@ def command_to_gcode(command) -> str:
         return command_to_gcode(["writeparam", 2, 1])
 
     elif command[0] == "go" and len(command) == 2:
+        if int(command[1][2]) > 0:
+            command[1][2] = 0
         return "G00 X{} Y{} Z{}".format(command[1][0], command[1][1], command[1][2])
 
     elif command[0] == "home" and len(command) == 2:
@@ -130,9 +132,13 @@ def command_to_gcode(command) -> str:
 
     elif command[0] == "getpos" and len(command) == 1:
         return "F82"
+
     elif command[0] == "reset_emergency" and len(command) == 1:
         client.mqtt_client.publish("farm/farm1/emergency", 0)
         return "F09"
+
+    elif command[0] == "report_params" and len(command) == 1:
+        return "F20"
 
     else:
         raise ValueError("Invalid command : " + str(command))
@@ -252,6 +258,7 @@ def gcode_interpreter(command: str):
             print("Z axis homing complete")
         elif command_type == 21:
             print("Parameter : " + data["P"] + " " + data["V"])
+            client.mqtt_client.publish("farm/farm1/params", "{\"P\":" + data["P"] + ", \"V\":" + data["V"] + "}")
         elif command_type == 31:
             print("Status : " + data["P"] + " " + data["V"])
         elif command_type == 41:

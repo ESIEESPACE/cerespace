@@ -5,6 +5,7 @@ const INSTANT_CHANEL = "/instants";
 const POSITION_CHANEL = "/position";
 const PING_CHANEL = "/ping";
 const EMERGENCY_CHANEL = "/emergency";
+const PARAMS_CHANEL = "/params";
 
 var coord = [0, 0, 0];
 
@@ -12,14 +13,18 @@ client.subscribe(MAIN_CHANEL);
 client.subscribe(MAIN_CHANEL + POSITION_CHANEL);
 client.subscribe(MAIN_CHANEL + PING_CHANEL);
 client.subscribe(MAIN_CHANEL + EMERGENCY_CHANEL);
+client.subscribe(MAIN_CHANEL + PARAMS_CHANEL);
 
 let emergency_btn = $("#emergency_btn");
 let unlock_btn = $("#unlock_btn");
 
 let go_coord_btn = $("#go_coord");
 
-let homing_btn = [ $("#home_x_btn"), $("#home_y_btn"), $("#home_z_btn")];
+let homing_btn = [$("#home_x_btn"), $("#home_y_btn"), $("#home_z_btn")];
 
+let xcoord = $("#xcoord");
+let ycoord = $("#ycoord");
+let zcoord = $("#zcoord");
 let xval = $("#xval");
 let yval = $("#yval");
 let zval = $("#zval");
@@ -31,6 +36,11 @@ client.on("message", function (topic, payload) {
             break;
         case MAIN_CHANEL + EMERGENCY_CHANEL:
             update_EStatus(parseInt(payload));
+            break;
+        case MAIN_CHANEL + PARAMS_CHANEL:
+            let data = JSON.parse(payload);
+            update_params(data["P"], data["V"]);
+            break;
         case MAIN_CHANEL:
             break;
         default:
@@ -41,9 +51,9 @@ client.on("message", function (topic, payload) {
 function update_position(val) {
     coord = [val["X"], val["Y"], val["Z"]];
 
-    xval.val(val["X"]);
-    yval.val(val["Y"]);
-    zval.val(val["Z"]);
+    xcoord.text(val["X"]);
+    ycoord.text(val["Y"]);
+    zcoord.text(val["Z"]);
 }
 
 function update_EStatus(val) {
@@ -134,6 +144,13 @@ function distChange(sender) {
 }
 
 $(document).ready(function () {
-    distChange(10);
     update_EStatus(0);
+    if (document.documentURI.includes("controller")) {
+        distChange(10);
+
+    }
+    else if (document.documentURI.includes("settings")) {
+        client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["report_params"]]))
+        init_settings();
+    }
 });

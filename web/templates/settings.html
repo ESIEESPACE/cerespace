@@ -2,8 +2,78 @@
 {% block body %}
     <div class="container">
         <h1>Cerespace settings</h1>
-        <button class="btn btn-outline-info my-2 my-sm-0" id="home_x_btn">Home X</button>
-        <button class="btn btn-outline-info my-2 my-sm-0" id="home_y_btn">Home Y</button>
-        <button class="btn btn-outline-info my-2 my-sm-0" id="home_z_btn">Home Z</button>
+
+        <table>
+            <thead>
+            <tr>
+                <th></th>
+                <th>X</th>
+                <th>Y</th>
+                <th>Z</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Homing</td>
+                <td>
+                    <button class="btn btn-outline-info my-2 my-sm-0" id="home_x_btn">Home X</button>
+                </td>
+                <td>
+                    <button class="btn btn-outline-info my-2 my-sm-0" id="home_y_btn">Home Y</button>
+                </td>
+                <td>
+                    <button class="btn btn-outline-info my-2 my-sm-0" id="home_z_btn">Home Z</button>
+                </td>
+            </tr>
+            <tr>
+                <td>Timeout</td>
+                <td><input type="number" class="form-control" id="timeout_x"></td>
+                <td><input type="number" class="form-control" id="timeout_y"></td>
+                <td><input type="number" class="form-control" id="timeout_z"></td>
+            </tr>
+            <tr>
+                <td>Keep active</td>
+                <td><input type="checkbox" id="kactive_x"></td>
+                <td><input type="checkbox" id="kactive_y"></td>
+                <td><input type="checkbox" id="kactive_z"></td>
+            </tr>
+            <tr>
+                <td>Home at boot</td>
+                <td><input type="checkbox" id="homeaboot_x"></td>
+                <td><input type="checkbox" id="homeaboot_y"></td>
+                <td><input type="checkbox" id="homeaboot_z"></td>
+            </tr>
+            <tr>
+                <td>Invert endpoints</td>
+                <td><input type="checkbox" id="invertendp_x"></td>
+                <td><input type="checkbox" id="invertendp_y"></td>
+                <td><input type="checkbox" id="invertendp_z"></td>
+            </tr>
+            <tr>
+                <td>Stop at home</td>
+                <td><input type="checkbox" id="stopahome_x"></td>
+                <td><input type="checkbox" id="stopahome_y"></td>
+                <td><input type="checkbox" id="stopahome_z"></td>
+            </tr>
+            <tr>
+                <td>Max speed</td>
+                <td><input type="number" class="form-control" id="maxspd_x"></td>
+                <td><input type="number" class="form-control" id="maxspd_y"></td>
+                <td><input type="number" class="form-control" id="maxspd_z"></td>
+            </tr>
+            <tr>
+                <td>min speed</td>
+                <td><input type="number" class="form-control" id="minspd_x"></td>
+                <td><input type="number" class="form-control" id="minspd_y"></td>
+                <td><input type="number" class="form-control" id="minspd_z"></td>
+            </tr>
+            <tr>
+                <td>NR steps</td>
+                <td><input type="number" class="form-control" id="nrsteps_x"></td>
+                <td><input type="number" class="form-control" id="nrsteps_y"></td>
+                <td><input type="number" class="form-control" id="nrsteps_z"></td>
+            </tr>
+            </tbody>
+        </table>
     </div>
 {% endblock %}
