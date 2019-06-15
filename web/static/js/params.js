@@ -42,8 +42,10 @@ function init_settings() {
             } else {
                 val = settings[index].val();
             }
+            let sende = [["writeparam", index, val]];
 
-            client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["writeparam", index, val]]))
+            client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify(sende));
+
         });
     }
 }

@@ -2,14 +2,15 @@ import time
 import serial
 import traceback
 import json
+import sqlite3
 
 from client import photos
 from client import client
 
 ser = serial.Serial()
 
+parameters_change = False
 parameters = {
-    2: "1",  # PARAM_CONFIG_OK
     3: "0",  # PARAM_USE_EEPROM
     4: "1",  # PARAM_E_STOP_ON_MOV_ERR
     5: "3",  # PARAM_MOV_NR_RETRY
@@ -95,6 +96,7 @@ parameters = {
 
 
 def command_to_gcode(command) -> str:
+    global parameters_change
     if command[0] == "emergency":
         client.mqtt_client.publish("farm/farm1/emergency", 0)
         return "E"
@@ -125,6 +127,8 @@ def command_to_gcode(command) -> str:
         return "F32 P{} V{} W{} T{} M{}".format(command[1], command[2], command[3], command[4], command[5])
 
     elif command[0] == "writeparam" and len(command) == 3:
+        parameters_change = True
+        parameters[int(command[1])] = command[2]
         return "F22 P{} V{}".format(command[1], command[2])
 
     elif command[0] == "getparam" and len(command) == 2:
@@ -288,12 +292,15 @@ def gcode_interpreter(command: str):
 
 
 def send_params():
-    for param_id in range(3, 224):
+    client.db_curs.execute('''SELECT * FROM settings''')
+    data = client.db_curs.fetchall()
+    for param in data:
         try:
-            if parameters[param_id] != "":
-                ser.write("F22 P{} V{} \r\n".format(param_id, parameters[param_id]).encode())
+
+            if param[1] != "":
+                ser.write("F22 P{} V{} \r\n".format(param[0], param[1]).encode())
                 time.sleep(0.1)
-                print("Send command: " + str(param_id))
+                print("Send command: " + str(param[0]))
         except KeyError:
             ""
         except:

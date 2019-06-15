@@ -1,8 +1,10 @@
 import json
+import os
 import sys
 import threading
 import time
 import traceback
+import sqlite3
 
 import paho.mqtt.client as mqtt
 
@@ -12,6 +14,9 @@ mqtt_client = mqtt.Client("farm_client")
 
 MQTT_SERVER = "mqtt"
 HTTP_SERVER = "web"
+
+db = sqlite3.connect(os.path.dirname(os.path.abspath(__file__)) + "/data.db")
+db_curs = db.cursor()
 
 
 def on_connect(client: mqtt.Client, userdata, flags, rc: int):
@@ -47,6 +52,7 @@ def on_message(client: mqtt.Client, userdata, msg: mqtt.MQTTMessage):
 def send_logs(message):
     mqtt_client.publish("/farm/farm1/logs", message)
 
+
 def connect():
     try:
         run.connect()
@@ -75,13 +81,36 @@ def main_loop():
                 run.gcode_interpreter(line)
             else:
                 time.sleep(1)
+
+            if run.parameters_change:
+                update_db()
+                run.parameters_change = False
         except Exception:
             time.sleep(1)
+
+
+def init_db():
+    try:
+        db_curs.execute('''CREATE TABLE settings (param INT UNIQUE, value TEXT)''')
+        for param in run.parameters:
+            db_curs.execute('''INSERT INTO settings VALUES (?, ?)''',
+                            (int(param), str(run.parameters[param])))
+        db.commit()
+    except:
+        ""
+
+
+def update_db():
+    for param in run.parameters:
+        db_curs.execute('''UPDATE settings SET value = ? WHERE param = ?''', (str(run.parameters[param]), int(param)))
+    db.commit()
 
 
 def main():
     print("Starting CERESPACE Client")
     connect()
+    init_db()
+
     mqtt_client.loop_start()
 
     try:
@@ -92,6 +121,7 @@ def main():
         traceback.print_exc(file=sys.stdout)
 
     mqtt_client.loop_stop()
+    db.close()
     sys.exit(0)
 
 

@@ -117,3 +117,5 @@ venv.bak/
 db/
 client/photos/*
 web/media/upload/
+
+data.db
