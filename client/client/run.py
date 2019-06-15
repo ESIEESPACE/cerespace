@@ -1,8 +1,11 @@
+import os
 import time
 import serial
 import traceback
 import json
 import sqlite3
+
+from datetime import datetime
 
 from client import photos
 from client import client
@@ -308,9 +311,14 @@ def send_params():
         try:
 
             if param[1] != "":
+                stime = datetime.now().timestamp()
                 ser.write("F22 P{} V{} \r\n".format(param[0], param[1]).encode())
-                time.sleep(0.1)
                 print("Send command: " + str(param[0]))
+                rdline = ""
+                while ("R21" in rdline) is not True:
+                    rdline = str(ser.readline())
+
+                print("resp: " + rdline)
         except KeyError:
             ""
         except:

@@ -29,6 +29,8 @@ let xval = $("#xval");
 let yval = $("#yval");
 let zval = $("#zval");
 
+let water_btn = $("#water");
+
 client.on("message", function (topic, payload) {
     switch (topic) {
         case MAIN_CHANEL + POSITION_CHANEL:
@@ -133,6 +135,10 @@ homing_btn[1].click(function () {
 
 homing_btn[2].click(function () {
     client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["home", "Z"]]))
+});
+
+water_btn.click(function () {
+   client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["water"]]));
 });
 
 function distChange(sender) {
