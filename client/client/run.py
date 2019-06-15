@@ -9,6 +9,8 @@ from client import client
 
 ser = serial.Serial()
 
+queue = 0
+
 parameters_change = False
 parameters = {
     3: "0",  # PARAM_USE_EEPROM
@@ -149,6 +151,7 @@ def command_to_gcode(command) -> str:
 
 
 def run_command(command):
+    global queue
     print(str(command))
     if command[0] == "wait" and len(command) == 2:
         print("wait for {}ms".format(command[1]))
@@ -173,13 +176,15 @@ def run_command(command):
 
     else:
         try:
-            print("returned G-CODE : {}".format(command_to_gcode(command)))
+            print("returned G-CODE : {} Q{}".format(command_to_gcode(command), queue))
+            queue += 1
             ser.write((command_to_gcode(command) + "\r\n").encode())
         except ValueError:
             traceback.print_exc()
 
 
 def gcode_interpreter(command: str):
+    global queue
     try:
         command = command.decode('utf-8')
         command_dec = command.split(" ")
@@ -233,8 +238,10 @@ def gcode_interpreter(command: str):
             print("Command started")
         elif command_type == 2:
             print("Command succeed")
+            queue -= 1
         elif command_type == 3:
             print("Command finished with error")
+            queue -= 1
         elif command_type == 4:
             print("Command running")
         elif command_type == 5:
@@ -254,6 +261,7 @@ def gcode_interpreter(command: str):
             print("Echo : " + command)
         elif command_type == 9:
             print("Command invalid")
+            queue -= 1
         elif command_type == 11:
             print("X axis homing complete")
         elif command_type == 12:
@@ -289,6 +297,8 @@ def gcode_interpreter(command: str):
             print(command)
     except:
         traceback.print_exc()
+    if queue > 0:
+        queue = 0
 
 
 def send_params():

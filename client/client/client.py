@@ -81,7 +81,6 @@ def main_loop():
                 run.gcode_interpreter(line)
             else:
                 time.sleep(1)
-
             if run.parameters_change:
                 update_db()
                 run.parameters_change = False
@@ -96,6 +95,11 @@ def init_db():
             db_curs.execute('''INSERT INTO settings VALUES (?, ?)''',
                             (int(param), str(run.parameters[param])))
         db.commit()
+    except:
+        ""
+
+    try:
+        db_curs.execute('''CREATE TABLE event (id INT UNIQUE, name TEXT, cond TEXT, data TEXT)''')
     except:
         ""
 
