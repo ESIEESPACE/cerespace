@@ -359,7 +359,7 @@ def home():
 def connect():
     global ser
     ser.baudrate = 115200
-    ser.port = '/dev/ttyACM1'
+    ser.port = '/dev/ttyACM0'
     ser.open()
 
 
