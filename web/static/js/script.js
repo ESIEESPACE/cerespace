@@ -1,4 +1,4 @@
-var client = mqtt.connect("ws://0.0.0.0:9001");
+var client = mqtt.connect("ws://" + window.location.hostname + ":9001");
 
 const MAIN_CHANEL = "farm/farm1";
 const INSTANT_CHANEL = "/instants";
@@ -138,7 +138,7 @@ homing_btn[2].click(function () {
 });
 
 water_btn.click(function () {
-   client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["water"]]));
+    client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["water"]]));
 });
 
 function distChange(sender) {
@@ -154,8 +154,7 @@ $(document).ready(function () {
     if (document.documentURI.includes("controller")) {
         distChange(10);
 
-    }
-    else if (document.documentURI.includes("settings")) {
+    } else if (document.documentURI.includes("settings")) {
         client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["report_params"]]))
         init_settings();
     }
