@@ -18,7 +18,7 @@ parameters_change = False
 parameters = {
     3: "0",  # PARAM_USE_EEPROM
     4: "1",  # PARAM_E_STOP_ON_MOV_ERR
-    5: "3",  # PARAM_MOV_NR_RETRY
+    5: "1",  # PARAM_MOV_NR_RETRY
     11: "120",  # MOVEMENT_TIMEOUT_X
     12: "120",  # MOVEMENT_TIMEOUT_Y
     13: "120",  # MOVEMENT_TIMEOUT_Z
@@ -96,8 +96,9 @@ parameters = {
     205: "",  # PIN_GUARD_2_PIN_NR
     206: "",  # PIN_GUARD_2_TIME_OUT
     207: "",  # PIN_GUARD_2_ACTIVE_STATE
-
 }
+
+pompe = 10
 
 
 def command_to_gcode(command) -> str:
@@ -149,6 +150,9 @@ def command_to_gcode(command) -> str:
     elif command[0] == "report_params" and len(command) == 1:
         return "F20"
 
+    elif command[0] == "water" and len(command) == 1:
+        return "F44 P{} V255 W0 T10000 M0".format(pompe)
+
     else:
         raise ValueError("Invalid command : " + str(command))
 
@@ -176,7 +180,6 @@ def run_command(command):
         photos.take_photo()
     elif command[0] == "send_params":
         send_params()
-
     else:
         try:
             print("returned G-CODE : {} Q{}".format(command_to_gcode(command), queue))
@@ -188,6 +191,8 @@ def run_command(command):
 
 def gcode_interpreter(command: str):
     global queue
+    if queue > 0:
+        queue = 0
     try:
         command = command.decode('utf-8')
         command_dec = command.split(" ")
@@ -315,7 +320,7 @@ def send_params():
                 ser.write("F22 P{} V{} \r\n".format(param[0], param[1]).encode())
                 print("Send command: " + str(param[0]))
                 rdline = ""
-                while ("R21" in rdline) is not True:
+                while (("R21" in rdline) is not True) and stime + 1 > datetime.now().timestamp():
                     rdline = str(ser.readline())
 
                 print("resp: " + rdline)
@@ -324,13 +329,37 @@ def send_params():
         except:
             traceback.print_exc()
     ser.write("F22 P2 V1\r\n".encode())
+    rdline = ""
+    while (("R21" in rdline) is not True) and stime + 1 > datetime.now().timestamp():
+        rdline = str(ser.readline())
+    ser.write("F43 P{} V1\r\n".format(pompe).encode())
     print("Send params")
+    home()
+
+
+def home():
+    while str(ser.readline()).encode("UTF-8") == "":
+        ""
+    ser.write("F11\r\n".encode())
+    rdline = ""
+    while ("R02" in rdline) is not True:
+        rdline = str(ser.readline())
+
+    ser.write("F12\r\n".encode())
+    rdline = ""
+    while ("R02" in rdline) is not True:
+        rdline = str(ser.readline())
+
+    ser.write("F13\r\n".encode())
+    rdline = ""
+    while ("R02" in rdline) is not True:
+        rdline = str(ser.readline())
 
 
 def connect():
     global ser
     ser.baudrate = 115200
-    ser.port = '/dev/ttyACM0'
+    ser.port = '/dev/ttyACM1'
     ser.open()
 
 

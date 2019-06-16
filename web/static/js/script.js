@@ -12,7 +12,7 @@ var coord = [0, 0, 0];
 client.subscribe(MAIN_CHANEL);
 client.subscribe(MAIN_CHANEL + POSITION_CHANEL);
 client.subscribe(MAIN_CHANEL + PING_CHANEL);
-client.subscribe(MAIN_CHANEL + EMERGENCY_CHANEL);
+client.subscribe(MAIN_CHANEL +   EMERGENCY_CHANEL);
 client.subscribe(MAIN_CHANEL + PARAMS_CHANEL);
 
 let emergency_btn = $("#emergency_btn");
