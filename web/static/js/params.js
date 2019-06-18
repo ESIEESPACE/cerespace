@@ -50,6 +50,8 @@ function init_settings() {
     }
 }
 
+
+
 function update_params(param, val) {
     param = parseInt(param);
     val = parseFloat(val);

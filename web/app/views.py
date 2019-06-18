@@ -26,6 +26,10 @@ def settings(request: django.http.HttpRequest):
     return render(request, 'settings.html')
 
 
+def event(request: django.http.HttpRequest):
+    return render(request, 'event.html')
+
+
 @csrf_exempt
 def photo_upload(request: django.http.HttpRequest):
     if request.method == "POST" and request.FILES["photo"]:

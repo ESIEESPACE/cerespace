@@ -158,4 +158,6 @@ $(document).ready(function () {
         client.publish(MAIN_CHANEL + INSTANT_CHANEL, JSON.stringify([["report_params"]]))
         init_settings();
     }
+
+    setInterval(init_settings, 5000);
 });

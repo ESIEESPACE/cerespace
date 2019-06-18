@@ -14,6 +14,8 @@ ser = serial.Serial()
 
 queue = 0
 
+emergency_state = False
+
 parameters_change = False
 parameters = {
     3: "0",  # PARAM_USE_EEPROM
@@ -103,7 +105,10 @@ pompe = 10
 
 def command_to_gcode(command) -> str:
     global parameters_change
+    global emergency_state
+
     if command[0] == "emergency":
+        emergency_state = True
         client.mqtt_client.publish("farm/farm1/emergency", 0)
         return "E"
 
@@ -145,13 +150,14 @@ def command_to_gcode(command) -> str:
 
     elif command[0] == "reset_emergency" and len(command) == 1:
         client.mqtt_client.publish("farm/farm1/emergency", 0)
+        emergency_state = False
         return "F09"
 
     elif command[0] == "report_params" and len(command) == 1:
         return "F20"
 
     elif command[0] == "water" and len(command) == 1:
-        return "F44 P{} V255 W0 T10000 M0".format(pompe)
+        return "F44 P{} V1 W0 T10000 M0".format(pompe)
 
     else:
         raise ValueError("Invalid command : " + str(command))
@@ -191,6 +197,7 @@ def run_command(command):
 
 def gcode_interpreter(command: str):
     global queue
+    global emergency_state
     if queue > 0:
         queue = 0
     try:
@@ -295,6 +302,7 @@ def gcode_interpreter(command: str):
             pass
         elif command_type == 87:
             client.mqtt_client.publish("farm/farm1/emergency", 1)
+            emergency_state = True
             print("Emergency return")
         elif command_type == 88:
             print("No params")
@@ -316,44 +324,25 @@ def send_params():
         try:
 
             if param[1] != "":
-                stime = datetime.now().timestamp()
-                ser.write("F22 P{} V{} \r\n".format(param[0], param[1]).encode())
+                send_important_command("F22 P{} V{}".format(param[0], param[1]))
                 print("Send command: " + str(param[0]))
-                rdline = ""
-                while (("R21" in rdline) is not True) and stime + 1 > datetime.now().timestamp():
-                    rdline = str(ser.readline())
-
-                print("resp: " + rdline)
         except KeyError:
             ""
         except:
             traceback.print_exc()
-    ser.write("F22 P2 V1\r\n".encode())
-    rdline = ""
-    while (("R21" in rdline) is not True) and stime + 1 > datetime.now().timestamp():
-        rdline = str(ser.readline())
-    ser.write("F43 P{} V1\r\n".format(pompe).encode())
+    send_important_command("F22 P2 V1")
+    send_important_command("F43 P{} V1".format(pompe))
+    send_important_command("F41 P{} V0 M0".format(pompe))
     print("Send params")
     home()
 
 
 def home():
-    while str(ser.readline()).encode("UTF-8") == "":
-        ""
-    ser.write("F11\r\n".encode())
-    rdline = ""
-    while ("R02" in rdline) is not True:
-        rdline = str(ser.readline())
+    send_important_command("F11", 10000)
 
-    ser.write("F12\r\n".encode())
-    rdline = ""
-    while ("R02" in rdline) is not True:
-        rdline = str(ser.readline())
+    send_important_command("F12", 10000)
 
-    ser.write("F13\r\n".encode())
-    rdline = ""
-    while ("R02" in rdline) is not True:
-        rdline = str(ser.readline())
+    send_important_command("F13", 10000)
 
 
 def connect():
@@ -383,3 +372,28 @@ def get_motor_state(val) -> str:
         return "Crawling"
     else:
         return "Unknown state"
+
+
+def send_important_command(command: str, timeout: int = 10000):
+    while command_sync(command, timeout=timeout) is False:
+        print("Command " + command + " failed, retry")
+
+
+def command_sync(command: str, timeout: int = 1000) -> bool:
+    stime = datetime.now().timestamp()
+    ser.write((command + "\r\n").encode())
+    rdline = ""
+    while True:
+        rdline = ser.readline()
+        lrdline = str(rdline)
+        if emergency_state:
+            ser.write("F09\r\n".encode())
+        elif "R02" in lrdline:
+            return True
+        elif "R03" in lrdline:
+            return False
+        elif stime + timeout < datetime.now().timestamp() and timeout != -1:
+            return False
+        else:
+            gcode_interpreter(rdline)
+    return False

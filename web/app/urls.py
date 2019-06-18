@@ -11,4 +11,5 @@ urlpatterns = [
                   path('controller', views.control, name="controller"),
                   path('photo_upload', views.photo_upload, name="photo_upload"),
                   path('settings', views.settings, name="settings"),
+                  path('event', views.event, name="event"),
               ] + static(settings.STATIC_URL)
