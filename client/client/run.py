@@ -1,14 +1,11 @@
-import os
 import time
-import serial
 import traceback
-import json
-import sqlite3
-
 from datetime import datetime
 
-from client import photos
+import serial
+
 from client import client
+from client import photos
 
 ser = serial.Serial()
 
