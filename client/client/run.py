@@ -1,3 +1,4 @@
+import sys
 import time
 import traceback
 from datetime import datetime
@@ -345,7 +346,10 @@ def home():
 def connect():
     global ser
     ser.baudrate = 115200
-    ser.port = '/dev/ttyACM0'
+    if len(sys.argv) > 2:
+        ser.port = sys.argv[1]
+    else:
+        ser.port = '/dev/ttyACM0'
     ser.open()
 
 
